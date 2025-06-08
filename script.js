@@ -9,9 +9,10 @@ let direction = { x: 0, y: 0 };
 let food = { x: 5, y: 5 };
 let score = 0;
 let speed = 200;
-let gameInterval;
 let level = 1;
 let obstacles = [];
+let gameInterval;
+let isGameOver = false;
 
 document.addEventListener("keydown", keyDown);
 startGame();
@@ -23,6 +24,7 @@ function startGame() {
 }
 
 function keyDown(e) {
+  if (isGameOver) return;
   const { x, y } = direction;
   switch (e.key) {
     case "ArrowUp":
@@ -41,18 +43,20 @@ function keyDown(e) {
 }
 
 function gameLoop() {
+  if (isGameOver) return;
+
   const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
 
-  // Check boundaries or self or obstacle collision
+  // Collision detection
   if (
     head.x < 0 || head.x >= tileCount ||
     head.y < 0 || head.y >= tileCount ||
     snake.some(s => s.x === head.x && s.y === head.y) ||
     obstacles.some(o => o.x === head.x && o.y === head.y)
   ) {
+    isGameOver = true;
     clearInterval(gameInterval);
-    alert(`Game Over! Score: ${score}`);
-    location.reload();
+    drawGame(true);
     return;
   }
 
@@ -66,8 +70,8 @@ function gameLoop() {
       level++;
       speed = Math.max(50, speed - 20);
       clearInterval(gameInterval);
-      gameInterval = setInterval(gameLoop, speed);
       generateObstacles();
+      gameInterval = setInterval(gameLoop, speed);
     }
   } else {
     snake.pop();
@@ -76,26 +80,26 @@ function gameLoop() {
   drawGame();
 }
 
-function drawGame() {
+function drawGame(showGameOver = false) {
   ctx.fillStyle = "#111";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Obstacles
+  // Draw obstacles
   obstacles.forEach(o => {
-    ctx.fillStyle = "#888";
+    ctx.fillStyle = "#666";
     ctx.fillRect(o.x * gridSize, o.y * gridSize, gridSize, gridSize);
   });
 
-  // Snake
-  snake.forEach((segment, index) => {
-    const hue = (index * 15 + score * 5) % 360;
+  // Draw snake
+  snake.forEach((segment, i) => {
+    const hue = (i * 15 + score * 5) % 360;
     ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
     ctx.beginPath();
     ctx.roundRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize, 6);
     ctx.fill();
   });
 
-  // Fruit
+  // Draw food
   const gradient = ctx.createRadialGradient(
     food.x * gridSize + 10,
     food.y * gridSize + 10,
@@ -110,6 +114,19 @@ function drawGame() {
   ctx.beginPath();
   ctx.arc(food.x * gridSize + 10, food.y * gridSize + 10, 8, 0, Math.PI * 2);
   ctx.fill();
+
+  // Draw Game Over text
+  if (showGameOver) {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+    ctx.fillRect(0, canvas.height / 2 - 40, canvas.width, 80);
+
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 24px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2 - 5);
+    ctx.font = "20px sans-serif";
+    ctx.fillText(`Final Score: ${score}`, canvas.width / 2, canvas.height / 2 + 25);
+  }
 }
 
 function placeFood() {
@@ -134,17 +151,14 @@ function generateObstacles() {
       x: Math.floor(Math.random() * tileCount),
       y: Math.floor(Math.random() * tileCount)
     };
-    const overlapSnake = snake.some(s => s.x === o.x && s.y === o.y);
-    const overlapFood = food.x === o.x && food.y === o.y;
-    const overlapObstacle = obstacles.some(existing => existing.x === o.x && existing.y === o.y);
-
-    if (!overlapSnake && !overlapFood && !overlapObstacle) {
-      obstacles.push(o);
-    }
+    const overlap = snake.some(s => s.x === o.x && s.y === o.y) ||
+                    food.x === o.x && food.y === o.y ||
+                    obstacles.some(existing => existing.x === o.x && existing.y === o.y);
+    if (!overlap) obstacles.push(o);
   }
 }
 
-// Rounded rectangle polyfill for nicer rendering
+// Rounded rectangle support
 CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
   if (w < 2 * r) r = w / 2;
   if (h < 2 * r) r = h / 2;
