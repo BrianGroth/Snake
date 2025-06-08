@@ -1,0 +1,18 @@
+body {
+  font-family: sans-serif;
+  text-align: center;
+  background: linear-gradient(135deg, #f0f, #0ff);
+  color: #fff;
+  margin: 0;
+  padding-top: 20px;
+}
+
+#gameCanvas {
+  border: 3px solid #fff;
+  background-color: #111;
+}
+
+#score {
+  font-size: 20px;
+  margin-top: 10px;
+}
