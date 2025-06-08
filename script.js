@@ -134,11 +134,11 @@ function generateObstacles() {
       x: Math.floor(Math.random() * tileCount),
       y: Math.floor(Math.random() * tileCount)
     };
-    if (
-      !snake.some(s => s.x === o.x && s.y === o.y) &&
-      (food.x !== o.x || food.y !== o.y) &&
-      !obstacles.some(existing => existing.x === o.x && existing.y === o.y)
-    ) {
+    const overlapSnake = snake.some(s => s.x === o.x && s.y === o.y);
+    const overlapFood = food.x === o.x && food.y === o.y;
+    const overlapObstacle = obstacles.some(existing => existing.x === o.x && existing.y === o.y);
+
+    if (!overlapSnake && !overlapFood && !overlapObstacle) {
       obstacles.push(o);
     }
   }
