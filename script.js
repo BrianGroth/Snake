@@ -5,7 +5,7 @@ const gridSize = 20;
 const tileCount = canvas.width / gridSize;
 
 let snake = [{ x: 10, y: 10 }];
-let direction = null; // No direction at start
+let direction = null;
 let food = { x: 5, y: 5 };
 let score = 0;
 let speed = 200;
@@ -15,38 +15,30 @@ let gameInterval;
 let isGameOver = false;
 let hasStarted = false;
 
-document.addEventListener("keydown", keyDown);
-drawGame(); // Initial draw before game starts
-
-function startGameLoop() {
-  if (!gameInterval) {
-    gameInterval = setInterval(gameLoop, speed);
+document.addEventListener("keydown", (e) => {
+  if (e.key.includes("Arrow")) {
+    const dirMap = {
+      ArrowUp: [0, -1],
+      ArrowDown: [0, 1],
+      ArrowLeft: [-1, 0],
+      ArrowRight: [1, 0],
+    };
+    if (dirMap[e.key]) {
+      setDirection(...dirMap[e.key]);
+    }
   }
-}
+});
 
-function keyDown(e) {
+function setDirection(x, y) {
   if (isGameOver) return;
-
-  switch (e.key) {
-    case "ArrowUp":
-      if (!direction || direction.y === 0) direction = { x: 0, y: -1 };
-      break;
-    case "ArrowDown":
-      if (!direction || direction.y === 0) direction = { x: 0, y: 1 };
-      break;
-    case "ArrowLeft":
-      if (!direction || direction.x === 0) direction = { x: -1, y: 0 };
-      break;
-    case "ArrowRight":
-      if (!direction || direction.x === 0) direction = { x: 1, y: 0 };
-      break;
-  }
-
-  if (!hasStarted && direction) {
-    hasStarted = true;
-    placeFood();
-    generateObstacles();
-    startGameLoop();
+  if (!direction || direction.x !== -x && direction.y !== -y) {
+    direction = { x, y };
+    if (!hasStarted) {
+      hasStarted = true;
+      placeFood();
+      generateObstacles();
+      gameInterval = setInterval(gameLoop, speed);
+    }
   }
 }
 
@@ -124,7 +116,6 @@ function drawGame(showGameOver = false) {
   if (showGameOver) {
     ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
     ctx.fillRect(0, canvas.height / 2 - 40, canvas.width, 80);
-
     ctx.fillStyle = "#fff";
     ctx.font = "bold 24px sans-serif";
     ctx.textAlign = "center";
@@ -133,14 +124,13 @@ function drawGame(showGameOver = false) {
     ctx.fillText(`Final Score: ${score}`, canvas.width / 2, canvas.height / 2 + 25);
   }
 
-  if (!hasStarted) {
+  if (!hasStarted && !isGameOver) {
     ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     ctx.fillRect(0, canvas.height / 2 - 60, canvas.width, 120);
-
     ctx.fillStyle = "#fff";
     ctx.font = "20px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("Press an arrow key to start", canvas.width / 2, canvas.height / 2);
+    ctx.fillText("Use arrow keys or buttons to start", canvas.width / 2, canvas.height / 2);
   }
 }
 

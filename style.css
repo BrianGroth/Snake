@@ -1,18 +1,18 @@
-body {
-  font-family: sans-serif;
-  text-align: center;
-  background: linear-gradient(135deg, #f0f, #0ff);
-  color: #fff;
-  margin: 0;
-  padding-top: 20px;
+#controls {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
 }
 
-#gameCanvas {
-  border: 3px solid #fff;
-  background-color: #111;
-}
-
-#score {
-  font-size: 20px;
-  margin-top: 10px;
+#controls button {
+  font-size: 24px;
+  padding: 10px 20px;
+  margin: 2px;
+  border: none;
+  border-radius: 10px;
+  background: #333;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
 }
